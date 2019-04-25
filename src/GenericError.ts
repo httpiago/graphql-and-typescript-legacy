@@ -3,6 +3,7 @@ enum ErrorsCode {
   NOT_FOUND,
   FORBIDDEN,
   NOT_AUTHENTICATED,
+  QUERY_TOO_COMPLEX,
 }
 
 class GenericError extends Error {
