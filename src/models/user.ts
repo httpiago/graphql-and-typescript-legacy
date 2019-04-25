@@ -1,6 +1,6 @@
-import { ObjectType, Field, ID, registerEnumType } from "type-graphql";
+import { ObjectType, Field, ID } from "type-graphql";
 
-@ObjectType({ description: 'Estrutura dos dados de um usuário cadastrado.' })
+@ObjectType({ description: 'Data structure of a registered user.' })
 class User {
   @Field(type => ID)
   id: string;

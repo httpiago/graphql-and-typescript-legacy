@@ -1,6 +1,6 @@
 import { ObjectType, Field, ClassType, ID } from "type-graphql";
 
-import User from "../models/user";
+import User from "./models/user";
 
 @ObjectType({ isAbstract: true })
 abstract class PageInfo {
