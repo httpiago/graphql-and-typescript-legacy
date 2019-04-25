@@ -24,6 +24,12 @@ void (async function bootstrap() {
   server.post('/graphql', graphqlMiddleware((req, res, params) => ({
     schema,
     debug: true, // (DEV === true)
+    customFormatErrorFn: ({ message, originalError, ...err}) => ({
+      code: !(originalError && originalError.code) ? 'UNKNOWN' : originalError.code,
+      message,
+      ...err,
+      stack: originalError.stack,
+    })
   })))
   // Enable playground
   server.get('/graphql', expressPlayground({ endpoint: '/graphql' }))
