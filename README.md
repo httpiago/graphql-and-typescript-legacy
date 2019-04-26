@@ -4,7 +4,7 @@ The name is self explanatory. A simple server that creates a [GraphQL](https://g
 
 - [typescript](http://typescriptlang.org)
 - [type-graphql](https://typegraphql.ml/) (Highly recommended to learn!)
-- [apollo-server](https://www.apollographql.com/docs/apollo-server/)
+- [express-graphql](https://github.com/graphql/express-graphql)
 - [knexjs](https://knexjs.org)
 
 ## Installation
@@ -17,10 +17,8 @@ yarn install
 
 ## Commands
 
-- **`yarn run watch`**: Start the server with [nodemon](http://nodemon.io).
+- **`yarn run watch`**: Start the server with live-reloading using [ts-node-dev](https://www.npmjs.com/package/ts-node-dev).
 - **`yarn run start`**: Just start the server using [ts-node](https://github.com/TypeStrong/ts-node).
-
-Unfortunately server startup takes a long time 😕 (because of ts-node) but I am seeing how I can improve this 🕵️‍.
 
 ## License
 

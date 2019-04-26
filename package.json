@@ -6,15 +6,17 @@
   "main": "index.ts",
   "scripts": {
     "start": "ts-node index.ts",
-    "watch": "nodemon --exec \"ts-node index.ts\" --watch src --watch index.ts"
+    "watch": "ts-node-dev index.ts --ignore-watch node_modules"
   },
   "dependencies": {
     "express": "^4.16.4",
     "express-graphql": "^0.8.0",
+    "express-jwt": "^5.3.1",
     "faker": "^4.1.0",
     "graphql": "^14.2.1",
     "graphql-playground-middleware-express": "^1.7.12",
     "graphql-query-complexity": "^0.2.3",
+    "jsonwebtoken": "^8.5.1",
     "knex": "^0.16.5",
     "pg": "^7.10.0",
     "reflect-metadata": "^0.1.13",
@@ -28,7 +30,7 @@
     "@types/faker": "^4.1.5",
     "@types/graphql": "^14.2.0",
     "@types/knex": "^0.16.1",
-    "nodemon": "^1.18.11"
+    "ts-node-dev": "^1.0.0-pre.32"
   },
   "engines": {
     "node": ">= 8.x"
