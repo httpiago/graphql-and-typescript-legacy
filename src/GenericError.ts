@@ -4,6 +4,7 @@ enum ErrorsCode {
   FORBIDDEN,
   NOT_AUTHENTICATED,
   QUERY_TOO_COMPLEX,
+  BAD_REQUEST
 }
 
 class GenericError extends Error {

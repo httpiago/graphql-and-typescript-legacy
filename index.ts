@@ -9,7 +9,11 @@ import { buildSchema } from 'type-graphql'
 import importsToArray from 'import-to-array'
 import 'reflect-metadata'
 import * as path from 'path'
-import GenericError from './src/GenericError';
+import routes from './routes'
+import GenericError from './src/genericError'
+import authChecker from './src/authChecker'
+import * as jwtExpress from 'express-jwt'
+require('dotenv').config()
 
 const DEV = process.env.NODE_ENV !== 'production'
 const PORT = process.env.PORT || 8000
@@ -42,39 +46,52 @@ void (async function bootstrap() {
   server.use(bodyParser.urlencoded({ extended: false }))
   server.use(bodyParser.json())
   server.use(express.json())
+  // Define others server routes
+  server.use(routes)
+
   // build TypeGraphQL executable schema
   const schema = await buildSchema({
-    resolvers,
+    // @ts-ignore
+    resolvers: importsToArray(resolvers),
+    authChecker,
     // automatically create `schema.gql` file with schema definition in current folder
     emitSchemaFile: path.resolve(__dirname, 'schema.graphql'),
   })
 
+  const jwtMiddleware = jwtExpress({ secret: process.env.JWT_SECRET, credentialsRequired: false })
+
   // Create GraphQL server
-  server.post('/graphql', graphqlMiddleware((req, res, params) => ({
-    schema,
-    debug: true, // (DEV === true)
-    customFormatErrorFn: ({ message, originalError, ...err}) => ({
-      code: !(originalError && originalError.code) ? 'UNKNOWN' : originalError.code,
-      message,
-      ...err,
-      stack: originalError && originalError.stack,
-    }),
-    validationRules: [
-      // See more: https://github.com/slicknode/graphql-query-complexity
-      queryComplexity({
-        maximumComplexity: 25,
-        variables: params!.variables,
-        estimators: [
-          fieldConfigEstimator(),
-          simpleEstimator({ defaultComplexity: 0 })
-        ],
-        // @ts-ignore
-        createError(max: number, actual: number) {
-          return new GenericError('QUERY_TOO_COMPLEX', `The query exceeds the maximum complexity of ${max}. Actual complexity is ${actual}`);
-        }
-      })
-    ]
-  })))
+  server.post('/graphql', jwtMiddleware, graphqlEngine(async (request, res, params) => {
+    return {
+      schema,
+      context: {
+        // @ts-ignore "request.user" vem do jwtMiddleware
+        currentUserId: (request.user && request.user.id) ? request.user.id : null,
+      },
+      debug: true, // (DEV === true)
+      customFormatErrorFn: ({ message, originalError, ...err}) => ({
+        code: !(originalError && originalError.code) ? 'UNKNOWN' : originalError.code,
+        message,
+        ...err,
+        stack: originalError && originalError.stack,
+      }),
+      validationRules: [
+        // See more: https://github.com/slicknode/graphql-query-complexity
+        queryComplexity({
+          maximumComplexity: 25,
+          variables: params!.variables,
+          estimators: [
+            fieldConfigEstimator(),
+            simpleEstimator({ defaultComplexity: 0 })
+          ],
+          // @ts-ignore
+          createError(max: number, actual: number) {
+            return new GenericError('QUERY_TOO_COMPLEX', `The query exceeds the maximum complexity of ${max}. Actual complexity is ${actual}`);
+          }
+        })
+      ]
+    }
+  }))
   // Enable playground
   server.get('/graphql', expressPlayground({ endpoint: '/graphql' }))
 
