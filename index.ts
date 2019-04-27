@@ -26,7 +26,14 @@ void (async function bootstrap() {
     message: 'Too many requests, please try again after a few minutes.',
   }))
   server.use(helmet({
-    contentSecurityPolicy: { directives: { defaultSrc: ["'self'"] }},
+    // See more: https://content-security-policy.com/
+    // contentSecurityPolicy: { directives: {
+    //   defaultSrc: ["'self'"],
+    //   scriptSrc: ["'self'"],
+    //   styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+    //   imgSrc: ["'self'", 'data:', '*'],
+    //   connectSrc: ["'self'"]
+    // }},
     frameguard: true,
     hidePoweredBy: true,
     hsts: true,
