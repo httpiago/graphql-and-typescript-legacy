@@ -3,9 +3,10 @@
   "license": "MIT",
   "repository": "https://github.com/httpiago/graphql-server-with-typescript.git",
   "homepage": "link to playground",
-  "main": "index.ts",
+  "main": "index.js",
   "scripts": {
-    "start": "ts-node index.ts",
+    "build": "tsc",
+    "start": "node index.js",
     "watch": "ts-node-dev index.ts --ignore-watch node_modules",
     "debug": "ts-node-dev --inspect -- index.ts --ignore-watch node_modules"
   },
