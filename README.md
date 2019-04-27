@@ -19,6 +19,7 @@ yarn install
 
 - **`yarn run watch`**: Start the server with live-reloading using [ts-node-dev](https://www.npmjs.com/package/ts-node-dev).
 - **`yarn run start`**: Just start the server using [ts-node](https://github.com/TypeStrong/ts-node).
+- **`yarn run debug`**: Start the server using [ts-node-dev](https://www.npmjs.com/package/ts-node-dev) in debug mode to be attached by vs code.
 
 ## License
 

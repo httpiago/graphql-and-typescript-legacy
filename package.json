@@ -6,7 +6,8 @@
   "main": "index.ts",
   "scripts": {
     "start": "ts-node index.ts",
-    "watch": "ts-node-dev index.ts --ignore-watch node_modules"
+    "watch": "ts-node-dev index.ts --ignore-watch node_modules",
+    "debug": "ts-node-dev --inspect -- index.ts --ignore-watch node_modules"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
