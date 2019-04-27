@@ -1,6 +1,8 @@
 schema.gql
 schema.graphql
 node_modules/
+dist
+tsconfig.tsbuildinfo
 
 # Created by https://www.gitignore.io/api/node
 # Edit at https://www.gitignore.io/?templates=node
@@ -91,5 +93,3 @@ typings/
 .dynamodb/
 
 # End of https://www.gitignore.io/api/node
-
-tsconfig.tsbuildinfo

@@ -5,6 +5,7 @@
     "lib": ["es2016", "esnext.asynciterable"],
     "allowJs": true,
     "incremental": true,
+    "outDir": "./dist",
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
