@@ -5,23 +5,32 @@ import User from "./models/user";
 @ObjectType({ isAbstract: true })
 abstract class PageInfo {
   @Field() size: number;
-  @Field(type => ID) startCursor: string;
-  @Field(type => ID) endCursor: string;
+  @Field(type => ID, { nullable: true }) startCursor?: string;
+  @Field(type => ID, { nullable: true }) endCursor?: string;
   @Field() hasPreviousPage: boolean;
   @Field() hasNextPage: boolean;
 }
 
-export function PaginatedResponse<ItemType>(ItemClass: ClassType<ItemType>) {
+export function PaginatedResponse<ItemType>(ItemClass) {
+
+  @ObjectType({ isAbstract: true })
+  abstract class Node extends ItemClass {
+    @Field({ description: 'A cursor for use in pagination.' }) cursor: string;
+  }
+
   @ObjectType({ isAbstract: true })
   abstract class PaginatedResponseClass {
     @Field()
-    total: number;
+    totalCount: number;
 
-    @Field(type => [ItemClass])
-    items: Array<ItemType>;
+    @Field(type => [Node], { nullable: 'items' })
+    items: Array<Node>;
 
     @Field(type => PageInfo)
     pageInfo: PageInfo;
+    
+    @Field(type => String, { description: '"cursor" or "offset"' })
+    paginationStyle: 'cursor' | 'offset';
   }
 
   return PaginatedResponseClass

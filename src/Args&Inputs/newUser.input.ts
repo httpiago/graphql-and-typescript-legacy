@@ -1,6 +1,6 @@
 import { InputType, Field } from "type-graphql";
-import User from "../models/user";
 import { Length, IsEmail } from "class-validator";
+import User from "../models/user";
 
 @InputType({ description: 'New user data.' })
 class NewUserInput implements Partial<User> {
