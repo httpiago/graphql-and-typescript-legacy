@@ -3,6 +3,7 @@
     "module": "commonjs",
     "target": "es6",
     "lib": ["es2016", "esnext.asynciterable"],
+    "allowJs": true,
     "incremental": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
