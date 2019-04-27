@@ -1,16 +1,18 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es6",
-    "lib": ["es2016", "esnext.asynciterable"],
+    "target": "esnext",
+    "lib": ["esnext", "esnext.asynciterable"],
     "allowJs": true,
     "incremental": true,
     "outDir": "./dist",
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "noEmitOnError": true,
+    "esModuleInterop": true,
   },
   "include": ["src", "database"],
-  "files": ["index.ts"],
+  "files": ["index.ts", "routes.ts", "utils.ts", "types.ts"],
   "exclude": ["node_modules"]
 }
