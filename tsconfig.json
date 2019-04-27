@@ -4,6 +4,7 @@
     "target": "es6",
     "lib": ["es2016", "esnext.asynciterable"],
     "incremental": true,
+    "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
   },
