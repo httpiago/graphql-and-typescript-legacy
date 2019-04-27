@@ -40,13 +40,13 @@ class UserResolver {
     @Args() { first, offset, after }: PaginationArgs
   ): Promise<PaginatedUserResponse> {
     let query = [`SELECT * FROM (
-      SELECT ${userColumns.join(', ')}, ROW_NUMBER() OVER (ORDER BY id) FROM "users"
+      SELECT "${userColumns.join('", "')}", ROW_NUMBER() OVER (ORDER BY id) FROM "users"
     ) AS X`]
     let paginationStyle: 'cursor' | 'offset'
 
     // Cursor-based pagination
     if (typeof after !== 'undefined') {
-      query.push(`WHERE id > ${decode(after)}`)
+      query.push(`WHERE "id" > ${decode(after)}`)
       paginationStyle = 'cursor'
     }
 
@@ -60,10 +60,14 @@ class UserResolver {
       paginationStyle = 'offset'
     }
 
-    const items = await db.raw(query.join(' '))
-      .then(res => (
-        res.rows.map(item => ({ ...item, cursor: encode(item.id) }))
-      )) as Array<User & { row_number: string, cursor: string }>
+    let items: Array<User & { row_number: string, cursor: string }>
+    try {
+      items = await db.raw(query.join(' ')).then(res => {
+        return res.rows.map(item => ({ ...item, cursor: encode(item.id) }))
+      })
+    } catch (err) {
+      throw new GenericError('UNKNOWN', 'There was a problem fetching the elements.');
+    }
 
     const totalCount: number = await db.table('users').count('* as total').then(r => r[0].total)
     const hasAtLeast1Item = (items.length >= 1)
