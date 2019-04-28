@@ -1,5 +1,7 @@
 # graphql-server-with-typescript
 
+##### Still in development! ⚠
+
 The name is self explanatory. A simple server that creates a [GraphQL](https://graphql.org) api using:
 
 - [typescript](http://typescriptlang.org)
