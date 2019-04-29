@@ -6,7 +6,7 @@ The name is self explanatory. A simple server that creates a [GraphQL](https://g
 
 - [typescript](http://typescriptlang.org)
 - [type-graphql](https://typegraphql.ml/) (Highly recommended to learn!)
-- [express-graphql](https://github.com/graphql/express-graphql)
+- [apollo](https://www.apollographql.com/docs/apollo-server/)
 - [knexjs](https://knexjs.org)
 
 ## Installation

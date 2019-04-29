@@ -1,8 +1,8 @@
 import * as express from 'express'
 import * as isEmail from 'email-validator'
-import * as jwt from 'jsonwebtoken'
+import * as jwt from 'jwt-simple'
 import { randomBytes } from 'crypto'
-import { addMinutes, getTime, isAfter } from 'date-fns'
+import { addMinutes, getTime, isAfter, addDays } from 'date-fns'
 import db from './database'
 
 const routes = express.Router()
@@ -94,8 +94,12 @@ routes.get('/login-confirm', async (req, res) => {
     }
 
     // AUTHORIZED LOGIN! Generate api access token
-    const payload = { id: user_id }
-    const jwtToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '3 days' })
+    const payload = {
+      user_id,
+      iat: Date.now(), // issued at
+      exp: getTime(addDays(Date.now(), 3)) // expiration time
+    }
+    const jwtToken = jwt.encode(payload, process.env.JWT_SECRET)
 
     res.json({
       "authorization": `Bearer ${jwtToken}`
