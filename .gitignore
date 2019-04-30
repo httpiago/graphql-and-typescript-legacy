@@ -1,7 +1,6 @@
 schema.gql
 schema.graphql
 node_modules/
-dist
 tsconfig.tsbuildinfo
 
 # Created by https://www.gitignore.io/api/node

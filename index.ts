@@ -64,6 +64,7 @@ void (async function bootstrap() {
   new ApolloServer({
     schema,
     subscriptions: '/graphql/subscriptions',
+    introspection: true,
     playground: true, // (DEV === true)
     debug: true, // (DEV === true)
     context({ req }) {
