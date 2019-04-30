@@ -95,7 +95,7 @@ export async function getPaginatedRowsFromTable<ModelType>({
   }
 
   // Get the total rows in the table
-  const totalCount: number = await db.table(tableName).count('* as total').then(r => r[0].total)
+  const totalCount: number = await db.table(tableName).whereRaw(where.join(' AND ')).count('* as total').then(r => r[0].total)
 
   const hasAtLeast1Item = (result.length >= 1)
   const lastItem = result[result.length-1], firstItem = result[0]
