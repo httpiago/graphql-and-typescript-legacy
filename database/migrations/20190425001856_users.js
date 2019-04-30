@@ -6,9 +6,9 @@ exports.up = function(knex) {
   return knex.schema.createTable('users', (table) => {
     table.increments('id').unsigned().primary();
     table.string('name').nullable();
-    table.string('email').notNull().unique();
+    table.string('email').notNullable().unique();
     table.boolean('email_verified').defaultTo(false);
-    table.enum('role', ['admin', 'writer', 'reader']).notNull().defaultTo('reader');
+    table.enum('role', ['admin', 'writer', 'reader']).notNullable().defaultTo('reader');
   })
 };
 

@@ -6,10 +6,10 @@ exports.up = function(knex) {
   return knex.schema.createTable('tokens', (table) => {
     table.increments('id').unsigned().primary();
     table.string('user_id').nullable();
-    table.string('token').notNull();
-    table.enum('type', ['login-code', 'jwt']).notNull();
-    table.string('expires_in').notNull()
-    table.dateTime('created_at').notNull()
+    table.string('token').notNullable();
+    table.enum('type', ['login-code', 'jwt']).notNullable();
+    table.string('expires_in').notNullable()
+    table.dateTime('created_at').notNullable()
   })
 };
 

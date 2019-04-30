@@ -1,40 +1,52 @@
-import { ObjectType, Field, ClassType, ID } from "type-graphql";
+import { ObjectType, Field, ID } from "type-graphql";
 
 import User from "./models/user";
+import Tweet from "./models/tweet";
 
 @ObjectType({ isAbstract: true })
 abstract class PageInfo {
   @Field() size: number;
   @Field(type => ID, { nullable: true }) startCursor?: string;
   @Field(type => ID, { nullable: true }) endCursor?: string;
-  @Field() hasPreviousPage: boolean;
-  @Field() hasNextPage: boolean;
+  @Field({ nullable: true }) hasPreviousPage?: boolean;
+  @Field({ nullable: true }) hasNextPage?: boolean;
 }
 
-export function PaginatedResponse<ItemType>(ItemClass) {
+export function PaginatedResponseGeneric<ItemType>(ItemClass) {
 
-  @ObjectType({ isAbstract: true })
-  abstract class Node extends ItemClass {
-    @Field({ description: 'A cursor for use in pagination.' }) cursor: string;
+  @ObjectType(`${ItemClass.name}Edge`, { isAbstract: true })
+  abstract class Edge {
+    @Field(type => ItemClass, { description: 'The item at the end of the edge.' })
+    node: ItemType;
+
+    @Field({ description: 'A cursor for use in pagination.' })
+    cursor: string;
   }
 
   @ObjectType({ isAbstract: true })
-  abstract class PaginatedResponseClass {
-    @Field()
+  abstract class PaginatedResponse {
+    @Field({ description: 'Identifies the total count of items in the connection.' })
     totalCount: number;
 
-    @Field(type => [Node], { nullable: 'items' })
-    items: Array<Node>;
+    @Field(type => [Edge], { nullable: 'itemsAndList', description: 'A list of edges.' })
+    edges: Array<Edge>;
+
+    @Field(type => [ItemClass], { nullable: 'itemsAndList', description: 'A list of nodes.' })
+    nodes: Array<ItemType>;
 
     @Field(type => PageInfo)
     pageInfo: PageInfo;
     
-    @Field(type => String, { description: '"cursor" or "offset"' })
-    paginationStyle: 'cursor' | 'offset';
+    @Field(type => String, { nullable: true , description: '"cursor" or "offset"' })
+    paginationStyle?: 'cursor' | 'offset';
   }
 
-  return PaginatedResponseClass
+  return PaginatedResponse
 }
 
 @ObjectType()
-export class PaginatedUserResponse extends PaginatedResponse(User) { }
+export class UserConnection extends PaginatedResponseGeneric(User) {}
+
+@ObjectType()
+export class TweetConnection extends PaginatedResponseGeneric(Tweet) {}
+

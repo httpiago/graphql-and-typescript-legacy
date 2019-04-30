@@ -3,7 +3,7 @@ import { ObjectType, Field, ID } from "type-graphql";
 @ObjectType({ description: 'Data structure of a registered user.' })
 class User {
   @Field(type => ID)
-  id: string;
+  id: number;
 
   @Field(type => String, { nullable: true })
   name?: string;
