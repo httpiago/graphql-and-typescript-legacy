@@ -2,10 +2,11 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es6",
+    "moduleResolution": "node",
     "lib": ["es2016", "esnext.asynciterable"],
     "allowJs": true,
     "incremental": true,
-    "outDir": "./dist",
+    "outDir": "dist",
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
