@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc && copy knexfile.js dist",
+    "build-ts": "tsc && copy knexfile.js dist",
     "watch": "ts-node-dev index.ts --ignore-watch node_modules",
     "debug": "ts-node-dev --inspect -- index.ts --ignore-watch node_modules"
   },
