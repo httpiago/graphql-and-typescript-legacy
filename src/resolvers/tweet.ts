@@ -1,4 +1,4 @@
-import { Resolver, Query, Arg, Args, FieldResolver, Root, Mutation, Authorized, Ctx, ID } from "type-graphql";
+import { Resolver, Query, Arg, Args, FieldResolver, Root, Mutation, Authorized, Ctx, ID, Subscription, PubSub, PubSubEngine, ResolverFilterData } from "type-graphql";
 import { TweetConnection } from "../paginatedResponse";
 import PaginationArgs from "../args&inputs/pagination.args";
 import { getPaginatedRowsFromTable } from "../../utils";
@@ -107,9 +107,10 @@ class TweetResolvers {
   @Mutation(returns => Tweet, { description: 'Create a new tweet.', complexity: 5 })
   async createTweet(
     @Arg('input') input: NewTweetInput,
-    @Ctx() { currentUserId }: Context
+    @Ctx() { currentUserId }: Context,
+    @PubSub() pubSub: PubSubEngine
   ): Promise<Tweet> {
-    return await db.insert({
+    const newTweet = await db.insert({
       ...input,
       user_id: currentUserId,
       created_at: new Date().toISOString()
@@ -117,6 +118,10 @@ class TweetResolvers {
       .into('tweets')
       .returning('*')
       .then(res => res[0])
+
+    await pubSub.publish('NEW_TWEET', newTweet)
+
+    return newTweet;
   }
 
 
@@ -137,6 +142,22 @@ class TweetResolvers {
     if (result === 0) throw new GenericError('UNKNOWN', 'There was a problem deleting Tweet.');
 
     return `Done!`
+  }
+
+  @Subscription(returns => Tweet, {
+    description: 'Listen for new tweets.',
+    topics: 'NEW_TWEET',
+    filter: ({ args, payload }: ResolverFilterData<Tweet>) => {
+      // If "fromUser" is set, filter by user id.
+      return typeof args.fromUser === 'undefined' ? true : (payload.user_id == args.fromUser)
+    },
+    complexity: 30
+  })
+  async newTweets(
+    @Root() newTweetPayload: Tweet,
+    @Arg('fromUser', type => ID, { nullable: true, description: 'The Node ID of the user.' }) fromUser?: string,
+  ) {
+    return newTweetPayload
   }
 }
 

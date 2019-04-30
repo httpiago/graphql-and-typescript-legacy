@@ -1,10 +1,13 @@
 import * as express from 'express'
 import { ApolloServer } from 'apollo-server-express'
+import { createServer } from 'http'
+import { execute, subscribe } from 'graphql'
 import * as bodyParser from 'body-parser'
 import * as helmet from 'helmet'
 import * as rateLimit from 'express-rate-limit'
 import queryComplexity, { simpleEstimator, fieldConfigEstimator } from 'graphql-query-complexity'
 import { buildSchema } from 'type-graphql'
+import { SubscriptionServer } from 'subscriptions-transport-ws'
 import importsToArray from 'import-to-array'
 import 'reflect-metadata'
 import * as path from 'path'
@@ -20,15 +23,15 @@ const PORT = process.env.PORT || 8000
 import * as resolvers from './src/resolvers'
 
 void (async function bootstrap() {
-  const server = express()
+  const app = express()
 
-  server.enable("trust proxy"); // only if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
-  server.use(rateLimit({
+  app.enable("trust proxy"); // only if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
+  app.use(rateLimit({
     windowMs: (5) * 60 * 1000, // 5 minutes
     max: 100, // limit each IP to 100 requests per windowMs
     message: 'Too many requests, please try again after a few minutes.',
   }))
-  server.use(helmet({
+  app.use(helmet({
     // See more: https://content-security-policy.com/
     // contentSecurityPolicy: { directives: {
     //   defaultSrc: ["'self'"],
@@ -42,11 +45,11 @@ void (async function bootstrap() {
     hsts: true,
     permittedCrossDomainPolicies: { permittedPolicies: 'none' }
   }))
-  server.use(bodyParser.urlencoded({ extended: false }))
-  server.use(bodyParser.json())
-  server.use(express.json())
+  app.use(bodyParser.urlencoded({ extended: false }))
+  app.use(bodyParser.json())
+  app.use(express.json())
   // Define others server routes
-  server.use(routes)
+  app.use(routes)
 
   // build TypeGraphQL executable schema
   const schema = await buildSchema({
@@ -60,6 +63,7 @@ void (async function bootstrap() {
   // Create GraphQL server
   new ApolloServer({
     schema,
+    subscriptions: '/graphql/subscriptions',
     playground: true, // (DEV === true)
     debug: true, // (DEV === true)
     context({ req }) {
@@ -90,11 +94,18 @@ void (async function bootstrap() {
       }
     }
   })
-  .applyMiddleware({ app: server })
+  .applyMiddleware({ app })
+
+  const server = createServer(app)
 
   // Start the server
-  server.listen(PORT, (err) => {
-    if (err) throw err;
-    else console.log(`🚀  Server is running! GraphQL Playground available at http://localhost:${process.env.PORT}/graphql`)
+  server.listen(PORT, () => {
+    new SubscriptionServer({
+      schema, execute, subscribe,
+    }, {
+      server, path: '/graphql/subscriptions',
+    });
+
+    console.log(`🚀  Server is running! GraphQL Playground available at http://localhost:${process.env.PORT}/graphql`)
   })
 })()
