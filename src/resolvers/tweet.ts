@@ -1,4 +1,4 @@
-import { Resolver, Query, Arg, Args, FieldResolver, Root, Mutation, Authorized, Ctx } from "type-graphql";
+import { Resolver, Query, Arg, Args, FieldResolver, Root, Mutation, Authorized, Ctx, ID } from "type-graphql";
 import { TweetConnection } from "../paginatedResponse";
 import PaginationArgs from "../args&inputs/pagination.args";
 import { getPaginatedRowsFromTable } from "../../utils";
@@ -20,7 +20,7 @@ class TweetResolvers {
     return await db.select(userColumns).from('users').where({ id: user_id }).first() as User
   }
 
-  @FieldResolver(returns => Tweet, { nullable: true, description: 'The tweet associated with this node.', complexity: 4 })
+  @FieldResolver(returns => Tweet, { nullable: true, description: 'The original tweet associated with this node.', complexity: 4 })
   async replyTweet(
     @Root() { reply_to }: Tweet
   ): Promise<Tweet | null> {
@@ -30,7 +30,7 @@ class TweetResolvers {
     }
   }
 
-  @FieldResolver(returns => TweetConnection, { description: 'Get for all tweets that are marked as a response from tweet.', complexity: 10 })
+  @FieldResolver(returns => TweetConnection, { description: 'Get all tweets that are marked as a response from a specific tweet.', complexity: 10 })
   async replies(
     @Root() originalTweet: Tweet,
     @Args() { first, offset, after }: PaginationArgs
@@ -49,28 +49,37 @@ class TweetResolvers {
   async likesCount(
     @Root() tweetInfos: Tweet,
   ): Promise<number> {
-    // Conta
-    return await db.select('*')
-      .from('tweets')
-      .innerJoin('tweets_likes', 'tweets.id', '=', 'tweets_likes.tweet_id')
-      .where('tweets.id', '=', tweetInfos.id)
-      .then(res => res.length || 0) as number
+    try {
+      return await db.select('*')
+        .from('tweets')
+        .innerJoin('tweets_likes', 'tweets.id', '=', 'tweets_likes.tweet_id')
+        .where('tweets.id', '=', tweetInfos.id)
+        .then(res => res.length || 0) as number
+    }
+    catch(err) {
+      throw new GenericError('UNKNOWN', 'There was a problem counting the total number of likes.');
+    }
   }
 
-  @FieldResolver(returns => [User], { description: 'A list of users who have liked the tweet', complexity: 4 })
+  @FieldResolver(returns => [User], { nullable: 'items', description: 'A list of users who have liked the tweet', complexity: 4 })
   async peopleWhoLiked(
     @Root() tweetInfos: Tweet
   ): Promise<User[]> {
-    return await db.select(userColumns.map(c => `users.${c}`))
-      .from('users')
-      .innerJoin('tweets_likes', 'users.id', '=', 'tweets_likes.user_id')
-      .where('tweet_id', '=', tweetInfos.id)
+    try {
+      return await db.select(userColumns.map(c => `users.${c}`))
+        .from('users')
+        .innerJoin('tweets_likes', 'users.id', '=', 'tweets_likes.user_id')
+        .where('tweet_id', '=', tweetInfos.id)
+    }
+    catch(err) {
+      throw new GenericError('UNKNOWN', 'There was a problem fetching users who liked this tweet.');
+    }
   }
 
 
   @Query(returns => Tweet, { description: 'Get a specific tweet by id.', complexity: 1 })
   async tweet(
-    @Arg('id') id: string,
+    @Arg('id', type => ID) id: string,
   ): Promise<Tweet> {
     const tweet = await db.select('*').from('tweets').where({ id }).first() as Tweet
 
@@ -114,7 +123,7 @@ class TweetResolvers {
   @Authorized(['admin', 'writer'])
   @Mutation(returns => String, { description: 'Delete tweet by id.', complexity: 5 })
   async deleteTweet(
-    @Arg('id') id: string,
+    @Arg('id', type => ID) id: string,
     @Ctx() { currentUserId }: Context
   ): Promise<string> {
     const tweet = await db.select('*').from('tweets').where({ id }).first() as Tweet

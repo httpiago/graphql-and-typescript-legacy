@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Arg, Authorized, Ctx } from "type-graphql";
+import { Resolver, Mutation, Arg, Authorized, Ctx, ID } from "type-graphql";
 import db from "../../database";
 import { Context } from "../../types";
 import GenericError from "../genericError";
@@ -9,7 +9,7 @@ class LikesResolvers {
   @Authorized()
   @Mutation(returns => String, { description: 'Add a like to a tweet by id.', complexity: 10 })
   async addLike(
-    @Arg('tweetId') tweetId: string,
+    @Arg('tweetId', type => ID) tweetId: string,
     @Ctx() { currentUserId }: Context
   ): Promise<string> {
     const checkTweetExist = await db.select('*')
@@ -44,7 +44,7 @@ class LikesResolvers {
 
   @Mutation(returns => String, { description: 'Remove like from a tweet by id.', complexity: 10 })
   async removeLike(
-    @Arg('tweetId') tweetId: string,
+    @Arg('tweetId', type => ID) tweetId: string,
     @Ctx() { currentUserId }: Context
   ): Promise<string>  {
     const checkTweetExist = await db.select('*')

@@ -17,7 +17,7 @@ class Tweet {
   reply_to?: string;
 
   @Field()
-  created_at: string;
+  created_at: Date;
 }
 
 export default Tweet

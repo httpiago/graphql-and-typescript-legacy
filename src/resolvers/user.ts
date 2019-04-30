@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Arg, Args, Authorized, Ctx, FieldResolver, Root } from "type-graphql";
+import { Resolver, Query, Mutation, Arg, Args, Authorized, Ctx, FieldResolver, Root, ID } from "type-graphql";
 import PaginationArgs from "../args&inputs/pagination.args";
 import { UserConnection, TweetConnection } from "../paginatedResponse";
 import NewUserInput from "../args&inputs/newUser.input";
@@ -41,7 +41,7 @@ class UserResolver {
 
   @Query(returns => User, { description: 'Find specific user by id.', complexity: 1 })
   async user(
-    @Arg('id') id: string
+    @Arg('id', type => ID) id: string
   ): Promise<User> {
     const result = await db.select(userColumns).from('users').where({ id })
 
@@ -71,15 +71,27 @@ class UserResolver {
     return 'Deprecated! Use the normal login flow.';
   }
 
-
   @Authorized()
-  @Mutation(returns => String, { description: 'Delete user by id from database', complexity: 1 })
-  async deleteUser(
-    @Arg('id') id: string,
+  @Mutation(returns => String, { description: 'Delete current user from database.', complexity: 1 })
+  async deleteMe(
     @Ctx() { currentUserId }: Context
   ): Promise<string> {
-    if (currentUserId != id) throw new GenericError('FORBIDDEN', 'You are not allowed to perform this action!');
+    const result = await db.delete()
+      .from('users')
+      .where({ id: currentUserId })
 
+    if (result === 0) throw new GenericError('NOT_FOUND', 'Could not delete you.');
+
+    return `Done!`
+  }
+
+  // Deprecate!
+  @Authorized(['admin'])
+  @Mutation(returns => String, { description: 'Delete user by id from database. [Admin usage only]', complexity: 1 })
+  async deleteUserById(
+    @Arg('id', type => ID) id: string,
+    @Ctx() { currentUserId }: Context
+  ): Promise<string> {
     const result = await db.delete().from('users').where({ id })
 
     if (result === 0) throw new GenericError('NOT_FOUND', 'No users with this id were found.');
