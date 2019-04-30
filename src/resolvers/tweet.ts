@@ -45,6 +45,28 @@ class TweetResolvers {
     });
   }
 
+  @FieldResolver(returns => Number, { description: 'Count how many likes a tweet has.', complexity: 4 })
+  async likesCount(
+    @Root() tweetInfos: Tweet,
+  ): Promise<number> {
+    // Conta
+    return await db.select('*')
+      .from('tweets')
+      .innerJoin('tweets_likes', 'tweets.id', '=', 'tweets_likes.tweet_id')
+      .where('tweets.id', '=', tweetInfos.id)
+      .then(res => res.length || 0) as number
+  }
+
+  @FieldResolver(returns => [User], { description: 'A list of users who have liked the tweet', complexity: 4 })
+  async peopleWhoLiked(
+    @Root() tweetInfos: Tweet
+  ): Promise<User[]> {
+    return await db.select(userColumns.map(c => `users.${c}`))
+      .from('users')
+      .innerJoin('tweets_likes', 'users.id', '=', 'tweets_likes.user_id')
+      .where('tweet_id', '=', tweetInfos.id)
+  }
+
 
   @Query(returns => Tweet, { description: 'Get a specific tweet by id.', complexity: 1 })
   async tweet(
