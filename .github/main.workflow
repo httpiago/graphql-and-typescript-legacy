@@ -4,7 +4,7 @@ workflow "Compile TypeScript" {
 }
 
 action "Install deps" {
-  uses = "actions/npm@59b64a598378f31e49cb76f27d6f3312b582f680"
+  uses = "yarn"
   runs = "yarn install"
   env = {
     NODE_ENV = "development"
@@ -16,7 +16,7 @@ action "build" {
   needs = "Install deps"
   runs = "yarn run build-ts"
   env = {
-    NODE_ENV = "production"
+    NODE_ENV = "development"
   }
 }
 
