@@ -83,7 +83,7 @@ routes.get('/login-confirm', async (req, res) => {
     if (typeof checkTokenIsValid === 'undefined' || splittedCode.length !== 3) return AuthError(res, { code: 'FORBIDDEN', message: 'Invalid login code!' });
 
     // Delete token to prevent other logins with the same token
-    await db.delete().from('tokens').where({ token })
+    await db.delete().from('tokens').where({ token, type: 'login-code' })
 
     // Check if the token has expired
     if (isAfter(Date.now(), Number(checkTokenIsValid.expires_in))) return AuthError(res, { code: 'FORBIDDEN', message: 'The token has expired! Please try signing in again.' });
@@ -94,12 +94,19 @@ routes.get('/login-confirm', async (req, res) => {
     }
 
     // AUTHORIZED LOGIN! Generate api access token
+    const referenceInDb = randomBytes(16).toString('hex')
+    const expires_in = getTime(addDays(Date.now(), 3))
     const payload = {
       user_id,
+      referenceInDb,
+      scopes: ['api'],
       iat: Date.now(), // issued at
-      exp: getTime(addDays(Date.now(), 3)) // expiration time
+      exp: expires_in, // expiration time
     }
     const jwtToken = jwt.encode(payload, process.env.JWT_SECRET)
+
+    // Save token reference in database
+    await db.table('tokens').insert({ type: 'jwt', token: referenceInDb, expires_in, created_at: new Date().toISOString() })
 
     res.json({
       "authorization": `Bearer ${jwtToken}`

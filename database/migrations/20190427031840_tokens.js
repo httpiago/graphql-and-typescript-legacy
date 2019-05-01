@@ -8,8 +8,9 @@ exports.up = function(knex) {
     table.string('user_id').nullable();
     table.string('token').notNullable();
     table.enum('type', ['login-code', 'jwt']).notNullable();
-    table.string('expires_in').notNullable()
-    table.dateTime('created_at').notNullable()
+    table.boolean('is_revoked').defaultTo(false).notNullable();
+    table.string('expires_in').notNullable();
+    table.dateTime('created_at').notNullable();
   })
 };
 

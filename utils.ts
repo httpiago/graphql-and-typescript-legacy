@@ -25,7 +25,7 @@ export function decode(encodedText: Base64String) {
   return Buffer.from(encodedText, 'base64').toString('ascii');
 }
 
-export function parseRequestToken({ headers }: Request): { [index: string]: any } | null {
+export async function parseRequestToken({ headers }: Request): Promise<{ [index: string]: any } | null> {
   if (typeof headers === 'undefined' || typeof headers.authorization === 'undefined') return null
 
   const token = headers.authorization.split(' ')
@@ -35,6 +35,11 @@ export function parseRequestToken({ headers }: Request): { [index: string]: any 
   const decoded = jwt.decode(token[1], process.env.JWT_SECRET)
 
   if (isAfter(Date.now(), decoded.exp)) throw new Error('The token has expired.');
+
+  const checkToken = await db.table('tokens').where({ type: 'jwt', token: decoded.referenceInDb }).first('*')
+  if (typeof checkToken === 'undefined' || checkToken.is_revoked === true) {
+    throw new Error('Invalid token!');
+  }
 
   return decoded || null;
 }

@@ -67,8 +67,8 @@ void (async function bootstrap() {
     introspection: true,
     playground: true, // (DEV === true)
     debug: true, // (DEV === true)
-    context({ req }) {
-      const decoded = parseRequestToken(req)
+    context: async ({ req }) => {
+      const decoded = await parseRequestToken(req)
       return {
         currentUserId: (decoded !== null) ? decoded.user_id : null,
       }
@@ -90,7 +90,7 @@ void (async function bootstrap() {
     formatError({ originalError, ...error }) {
       return {
         // @ts-ignore
-        code: !(originalError.code) ? 'UNKNOWN' : originalError.code,
+        code: (originalError && 'code' in originalError) ? originalError.code : 'UNKNOWN',
         ...error
       }
     }
