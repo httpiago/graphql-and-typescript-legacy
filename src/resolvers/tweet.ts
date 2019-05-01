@@ -146,7 +146,7 @@ class TweetResolvers {
 
 
   @Authorized(['admin', 'writer'])
-  @Mutation(returns => String, { description: 'Delete tweet by id.', complexity: 5 })
+  @Mutation(returns => String, { description: 'Delete tweet by id. Returns "Done." if successful.', complexity: 5 })
   async deleteTweet(
     @Arg('id', type => ID) id: string,
     @Ctx() { currentUserId }: Context
@@ -161,7 +161,7 @@ class TweetResolvers {
     
     if (result === 0) throw new GenericError('UNKNOWN', 'There was a problem deleting Tweet.');
 
-    return `Done!`
+    return `Done.`
   }
 
   @Subscription(returns => Tweet, {

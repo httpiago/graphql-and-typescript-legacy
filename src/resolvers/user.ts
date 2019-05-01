@@ -72,7 +72,7 @@ class UserResolver {
   }
 
   @Authorized()
-  @Mutation(returns => String, { description: 'Delete current user from database.', complexity: 1 })
+  @Mutation(returns => String, { description: 'Delete current user from database. Returns "Done." if successful.', complexity: 1 })
   async deleteMe(
     @Ctx() { currentUserId }: Context
   ): Promise<string> {
@@ -82,12 +82,12 @@ class UserResolver {
 
     if (result === 0) throw new GenericError('NOT_FOUND', 'Could not delete you.');
 
-    return `Done!`
+    return `Done.`
   }
 
   // Deprecate!
   @Authorized(['admin'])
-  @Mutation(returns => String, { description: 'Delete user by id from database. [Admin usage only]', complexity: 1 })
+  @Mutation(returns => String, { description: 'Delete user by id from database. Returns "Done." if successful. [Admin usage only]', complexity: 1 })
   async deleteUserById(
     @Arg('id', type => ID) id: string,
     @Ctx() { currentUserId }: Context
@@ -96,7 +96,7 @@ class UserResolver {
 
     if (result === 0) throw new GenericError('NOT_FOUND', 'No users with this id were found.');
 
-    return `Done!`
+    return `Done.`
   }
 }
 

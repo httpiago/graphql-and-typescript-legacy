@@ -7,7 +7,7 @@ import GenericError from "../genericError";
 class LikesResolvers {
   
   @Authorized()
-  @Mutation(returns => String, { description: 'Add a like to a tweet by id.', complexity: 10 })
+  @Mutation(returns => String, { description: 'Add a like to a tweet by id. Returns "Done." if successful.', complexity: 10 })
   async addLike(
     @Arg('tweetId', type => ID) tweetId: string,
     @Ctx() { currentUserId }: Context
@@ -42,7 +42,7 @@ class LikesResolvers {
     }
   }
 
-  @Mutation(returns => String, { description: 'Remove like from a tweet by id.', complexity: 10 })
+  @Mutation(returns => String, { description: 'Remove like from a tweet by id. Returns "Done." if successful.', complexity: 10 })
   async removeLike(
     @Arg('tweetId', type => ID) tweetId: string,
     @Ctx() { currentUserId }: Context
