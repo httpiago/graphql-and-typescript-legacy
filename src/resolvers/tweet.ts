@@ -61,7 +61,7 @@ class TweetResolvers {
     }
   }
 
-  @FieldResolver(returns => [User], { nullable: 'items', description: 'A list of users who have liked the tweet', complexity: 4 })
+  @FieldResolver(returns => [User], { description: 'A list of users who have liked the tweet', complexity: 4 })
   async peopleWhoLiked(
     @Root() tweetInfos: Tweet
   ): Promise<User[]> {
@@ -73,6 +73,26 @@ class TweetResolvers {
     }
     catch(err) {
       throw new GenericError('UNKNOWN', 'There was a problem fetching users who liked this tweet.');
+    }
+  }
+  
+  @FieldResolver(returns => Boolean, { description: 'Whether or not the authenticated user has liked the tweet.', complexity: 4 })
+  async viewerHasLiked(
+    @Root() tweetInfos: Tweet,
+    @Ctx() { currentUserId } : Context
+  ): Promise<boolean> {
+    // If no user is logged in, return false
+    if (currentUserId === null) return false;
+
+    try {
+      return await db.count('*')
+        .from('tweets_likes')
+        .where('tweet_id', '=', tweetInfos.id)
+        .andWhere('user_id', '=', currentUserId)
+        .then(res => Number(res[0].count) > 0)
+    }
+    catch(err) {
+      throw new GenericError('UNKNOWN', 'There was a problem determining whether or not the current user has liked the tweet.');
     }
   }
 
