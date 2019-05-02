@@ -141,7 +141,8 @@ class TweetResolvers {
       .returning('*')
       .then(res => res[0])
 
-    await pubSub.publish('NEW_TWEET', newTweet)
+    const topicName = (typeof input.reply_to === 'undefined' || input.reply_to === null) ? 'NEW_TWEET' : 'NEW_REPLY'
+    await pubSub.publish(topicName, newTweet)
 
     return newTweet;
   }
@@ -166,18 +167,37 @@ class TweetResolvers {
     return `Done.`
   }
 
+
   @Subscription(returns => Tweet, {
     description: 'Listen for new tweets.',
     topics: 'NEW_TWEET',
     filter: ({ args, payload }: ResolverFilterData<Tweet>) => {
-      // If "fromUser" is set, filter by user id.
-      return typeof args.fromUser === 'undefined' ? true : (payload.user_id == args.fromUser)
+      // If "fromUser" is set, filter by user id in tweets
+      if (typeof args.fromUser !== 'undefined') return payload.user_id == args.fromUser;
+      else return true;
     },
     complexity: 30
   })
   async newTweets(
     @Root() newTweetPayload: Tweet,
     @Arg('fromUser', type => ID, { nullable: true, description: 'The Node ID of the user.' }) fromUser?: string,
+  ) {
+    return newTweetPayload
+  }
+
+
+  @Subscription(returns => Tweet, {
+    description: 'Listen for new replies to a specific tweet.',
+    topics: 'NEW_REPLY',
+    filter: ({ args, payload }: ResolverFilterData<Tweet>) => {
+      // Filter by reply_to in tweet
+      return payload.reply_to == args.toTweet;
+    },
+    complexity: 30
+  })
+  async newReplies(
+    @Root() newTweetPayload: Tweet,
+    @Arg('toTweet', type => ID, { description: 'The Node ID of the original tweet.' }) repliesTo?: string,
   ) {
     return newTweetPayload
   }
