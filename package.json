@@ -2,14 +2,14 @@
   "name": "graphql-server-with-typescript",
   "license": "MIT",
   "repository": "https://github.com/httpiago/graphql-server-with-typescript.git",
-  "homepage": "link to playground",
+  "homepage": "https://graphql-server-with-typescript.herokuapp.com/graphql",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/index.js",
-    "deploy": "git checkout -b heroku && yarn run build-ts && git add . && git commit -m \"New Deploy\" && git push --force --set-upstream origin heroku && git checkout master && git branch -d heroku",
-    "build-ts": "tsc && copy knexfile.js dist",
     "watch": "ts-node-dev index.ts --ignore-watch node_modules",
-    "debug": "ts-node-dev --inspect -- index.ts --ignore-watch node_modules"
+    "debug": "ts-node-dev --inspect -- index.ts --ignore-watch node_modules",
+    "start": "node dist/index.js",
+    "build-ts": "tsc && copy knexfile.js dist",
+    "deploy": "git checkout -b heroku && yarn run build-ts && git add . && git commit -m \"New Deploy\" && git push --force --set-upstream origin heroku && git checkout master && git branch -d heroku"
   },
   "dependencies": {
     "apollo-server-express": "^2.4.8",
