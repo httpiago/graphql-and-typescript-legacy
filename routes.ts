@@ -1,72 +1,10 @@
 import * as express from 'express'
-import * as isEmail from 'email-validator'
 import * as jwt from 'jwt-simple'
 import { randomBytes } from 'crypto'
-import { addMinutes, getTime, isAfter, addDays } from 'date-fns'
+import { getTime, isAfter, addDays } from 'date-fns'
 import db from './database'
 
 const routes = express.Router()
-
-routes.get('/login', (req, res) => {
-  res.send(`
-    <h1>Login/Sign up:</h1>
-    <form action="/login" method="POST">
-      <input type="email" name="email" required placeholder="Enter your email..." style="width: 200px;" />
-      <input type="submit" value="Login" />
-    </form>
-  `)
-})
-
-routes.post('/login', async (req, res) => {
-  const { email } = req.body
-
-  if (typeof email === 'undefined') return AuthError(res, { code: 'BAD_REQUEST', message: 'Define an "email".' });
-  if (!isEmail.validate(email)) return AuthError(res, { code: 'BAD_REQUEST', message: '.' });
-
-  try {
-    // Verify if the User is already registered
-    const user = await db.select('id').from('users').where({ email }).first()
-    const userAlreadyRegistered = (typeof user !== 'undefined')
-    let user_id = userAlreadyRegistered ? user.id : ''
-
-    if (userAlreadyRegistered === false) {
-      // Register new user in the database
-      user_id = await db.insert({ email }).into('users').returning('id').then(r => r[0])
-    }
-
-    // Generate login code
-    const token = randomBytes(16).toString('hex'), firstLogin = +!userAlreadyRegistered
-    const code = [user_id, token, firstLogin].join('.')
-
-    // Save code in the database for future verification in route /login-confirm
-    await db.insert({
-      token,
-      user_id,
-      type: 'login-code',
-      expires_in: getTime(addMinutes(Date.now(), 30)),
-      created_at: new Date().toISOString(),
-    }).into('tokens')
-
-    // Send email to the user with magic login link
-    // !!!JUST FOR TEST PURPOSE!!! You must send the code to the user's email!
-    return res.send(`
-      <h1>Email sent!</h1>
-      <br/><br/><br/><br/>
-      <h2>Fake email inbox:</h2>
-      <a href="/login-confirm?code=${encodeURIComponent(code)}">Confirm login</a>
-    `)
-
-    if (!userAlreadyRegistered) {
-      res.send('User registered and Email sent!');
-    } else {
-      res.send('Email sent!');
-    }
-  }
-  catch(err) {
-    console.error(err)
-    return AuthError(res, { code: 'UNKNOWN', message: 'There was an error logging in the user. :(' });
-  }
-})
 
 routes.get('/login-confirm', async (req, res) => {
   const { code } = req.query
@@ -106,7 +44,7 @@ routes.get('/login-confirm', async (req, res) => {
     const jwtToken = jwt.encode(payload, process.env.JWT_SECRET)
 
     // Save token reference in database
-    await db.table('tokens').insert({ type: 'jwt', token: referenceInDb, expires_in, created_at: new Date().toISOString() })
+    await db.table('tokens').insert({ type: 'jwt', token: referenceInDb, user_id, expires_in, created_at: new Date().toISOString() })
 
     res.json({
       "authorization": `Bearer ${jwtToken}`

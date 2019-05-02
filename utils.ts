@@ -1,6 +1,7 @@
 import { Request } from 'express';
 import * as jwt from 'jwt-simple'
 import { isAfter } from 'date-fns';
+import * as nodemailer from 'nodemailer'
 import GenericError from './src/genericError';
 import db from './database';
 import User from './src/models/user';
@@ -36,7 +37,7 @@ export async function parseRequestToken({ headers }: Request): Promise<{ [index:
 
   if (isAfter(Date.now(), decoded.exp)) throw new Error('The token has expired.');
 
-  const checkToken = await db.table('tokens').where({ type: 'jwt', token: decoded.referenceInDb }).first('*')
+  const checkToken = await db.table('tokens').where({ type: 'jwt', token: decoded.referenceInDb, is_revoked: false }).first('*')
   if (typeof checkToken === 'undefined' || checkToken.is_revoked === true) {
     throw new Error('Invalid token!');
   }
@@ -122,4 +123,29 @@ export async function getPaginatedRowsFromTable<ModelType>({
     },
     paginationStyle: after ? 'cursor' : offset ? 'offset' : null,
   };
+}
+
+type SendEmailOptions = { to: string, subject: string, body: string }
+/**
+ * @see https://nodemailer.com/about/
+ */
+export async function sendEmail({ to, subject, body } : SendEmailOptions) {
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASSWORD
+    }
+  })
+  
+  await transporter.sendMail({
+    from: `"graphql-test-api" <${process.env.MAIL_USER}>`, // sender address
+    to,
+    subject, // Subject line
+    html: body // html body
+  })
+
+  return true;
 }
