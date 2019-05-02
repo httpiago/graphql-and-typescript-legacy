@@ -115,7 +115,9 @@ class TweetResolvers {
     return await getPaginatedRowsFromTable({
       tableName: 'tweets',
       columns: '*',
-      where: [`"user_id" = ${fromUser}`],
+      ...(typeof fromUser !== 'undefined' ? {
+        where: [`"user_id" = ${fromUser}`]
+      } : {}),
       after,
       first,
       offset,
