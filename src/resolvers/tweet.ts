@@ -61,6 +61,21 @@ class TweetResolvers {
     }
   }
 
+  @FieldResolver(returns => Number, { description: 'Count how many replies a tweet has.', complexity: 4 })
+  async repliesCount(
+    @Root() tweetInfos: Tweet,
+  ): Promise<number> {
+    try {
+      return await db.select('*')
+        .from('tweets')
+        .where('reply_to', '=', tweetInfos.id)
+        .then(res => res.length || 0) as number
+    }
+    catch(err) {
+      throw new GenericError('UNKNOWN', 'There was a problem counting the total number of replies.');
+    }
+  }
+
   @FieldResolver(returns => [User], { description: 'A list of users who have liked the tweet', complexity: 4 })
   async peopleWhoLiked(
     @Root() tweetInfos: Tweet
@@ -117,6 +132,24 @@ class TweetResolvers {
       columns: '*',
       ...(typeof fromUser !== 'undefined' ? {
         where: [`"user_id" = ${fromUser}`]
+      } : {}),
+      after,
+      first,
+      offset,
+    });
+  }
+
+
+  @Query(returns => TweetConnection, { description: 'Search for replies to a specific tweet.', complexity: 10 })
+  async thread(
+    @Args() { first, offset, after }: PaginationArgs,
+    @Arg('id', type => ID, { description : 'Id of the original tweet.' }) id: string,
+  ) {
+    return await getPaginatedRowsFromTable({
+      tableName: 'tweets',
+      columns: '*',
+      ...(typeof id !== 'undefined' ? {
+        where: [`"reply_to" = ${id}`]
       } : {}),
       after,
       first,
