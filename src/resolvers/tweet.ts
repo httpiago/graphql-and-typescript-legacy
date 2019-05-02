@@ -38,7 +38,7 @@ class TweetResolvers {
     return await getPaginatedRowsFromTable({
       tableName: 'tweets',
       columns: '*',
-      where: [`reply_to = "${originalTweet.id}"`],
+      where: [`"reply_to" = ${originalTweet.id}`],
       after,
       first,
       offset,

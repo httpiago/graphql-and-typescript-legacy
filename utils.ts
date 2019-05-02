@@ -96,6 +96,7 @@ export async function getPaginatedRowsFromTable<ModelType>({
     // RUN QUERY
     result = await db.raw(query.join(' ')).then(res => res.rows)
   } catch (err) {
+    console.error('getPaginatedRowsFromTable ERROR', err);
     throw new GenericError('UNKNOWN', 'There was a problem fetching the elements.');
   }
 
