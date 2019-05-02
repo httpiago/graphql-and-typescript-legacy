@@ -178,7 +178,7 @@ class TweetResolvers {
     },
     complexity: 30
   })
-  async newTweets(
+  async tweetAdded(
     @Root() newTweetPayload: Tweet,
     @Arg('fromUser', type => ID, { nullable: true, description: 'The Node ID of the user.' }) fromUser?: string,
   ) {
@@ -195,7 +195,7 @@ class TweetResolvers {
     },
     complexity: 30
   })
-  async newReplies(
+  async replyAdded(
     @Root() newTweetPayload: Tweet,
     @Arg('toTweet', type => ID, { description: 'The Node ID of the original tweet.' }) repliesTo?: string,
   ) {
