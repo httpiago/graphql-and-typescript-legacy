@@ -8,6 +8,7 @@ import { Context } from '../../types'
 import { getPaginatedRowsFromTable } from '../../utils'
 import db from '../../database'
 import Tweet from "../models/tweet";
+import UpdateUserInput, { Role } from "../args&inputs/updateUser.input";
 
 // Do not order all columns for security reasons
 export const userColumns = ['id', 'name', 'email', 'role']
@@ -66,10 +67,30 @@ class UserResolver {
   }
 
 
+  @Authorized()
+  @Mutation(returns => String, { description: 'Update infos of current user. Returns "Done." if successful.', complexity: 1 })
+  async updateMe(
+    @Arg('input') { role, ...input }: UpdateUserInput,
+    @Ctx() { currentUserId }: Context
+  ): Promise<string> {
+    const result = await db.table('users')
+      .update({
+        ...input,
+        ...(typeof role !== 'undefined' ? { role: Role[role] } : {})
+      })
+      .where({ id: currentUserId })
+
+    if (result === 0) throw new GenericError('NOT_FOUND', 'Could not update you.');
+
+    return `Done.`
+  }
+
+
   @Mutation(returns => String, { deprecationReason: 'This function can not be used anymore. Log in normally to register' })
   async createUser(): Promise<string> {
     return 'Deprecated! Use the normal login flow.';
   }
+
 
   @Authorized()
   @Mutation(returns => String, { description: 'Delete current user from database. Returns "Done." if successful.', complexity: 1 })
