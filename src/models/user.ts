@@ -15,6 +15,6 @@ class User {
   role: keyof typeof Role;
 }
 
-enum Role { admin, writer, reader }
+enum Role { admin, user }
 
 export default User

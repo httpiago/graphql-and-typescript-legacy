@@ -17,7 +17,7 @@ class UpdateUserInput implements Partial<User> {
   role?: keyof typeof Role;
 }
 
-export enum Role { admin, writer, reader }
+export enum Role { admin, user }
 registerEnumType(Role, {
   name: "Role",
   description: "The role of user for authorization.",

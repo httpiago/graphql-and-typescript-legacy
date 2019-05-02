@@ -158,7 +158,7 @@ class TweetResolvers {
   }
 
 
-  @Authorized(['admin', 'writer'])
+  @Authorized(['admin', 'user'])
   @Mutation(returns => Tweet, { description: 'Create a new tweet.', complexity: 5 })
   async createTweet(
     @Arg('input') input: NewTweetInput,
@@ -181,7 +181,7 @@ class TweetResolvers {
   }
 
 
-  @Authorized(['admin', 'writer'])
+  @Authorized(['admin', 'user'])
   @Mutation(returns => String, { description: 'Delete tweet by id. Returns "Done." if successful.', complexity: 5 })
   async deleteTweet(
     @Arg('id', type => ID) id: string,

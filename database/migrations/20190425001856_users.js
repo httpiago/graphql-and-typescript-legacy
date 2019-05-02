@@ -8,7 +8,7 @@ exports.up = function(knex) {
     table.string('name').nullable();
     table.string('email').notNullable().unique();
     table.boolean('email_verified').defaultTo(false);
-    table.enum('role', ['admin', 'writer', 'reader']).notNullable().defaultTo('reader');
+    table.enum('role', ['admin', 'user']).notNullable().defaultTo('user');
   })
 };
 
