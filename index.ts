@@ -6,6 +6,7 @@ import * as bodyParser from 'body-parser'
 import * as helmet from 'helmet'
 import * as rateLimit from 'express-rate-limit'
 import queryComplexity, { simpleEstimator, fieldConfigEstimator } from 'graphql-query-complexity'
+import * as depthLimit from 'graphql-depth-limit'
 import { buildSchema } from 'type-graphql'
 import { SubscriptionServer } from 'subscriptions-transport-ws'
 import importsToArray from 'import-to-array'
@@ -74,6 +75,8 @@ void (async function bootstrap() {
       }
     },
     validationRules: [
+      // See more: https://www.npmjs.com/package/graphql-depth-limit
+      depthLimit(10),
       // See more: https://github.com/slicknode/graphql-query-complexity
       queryComplexity({
         maximumComplexity: 30,

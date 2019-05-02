@@ -53,7 +53,7 @@ routes.post('/login', async (req, res) => {
       <h1>Email sent!</h1>
       <br/><br/><br/><br/>
       <h2>Fake email inbox:</h2>
-      <a href="/login-confirm?code=${code}">Confirm login</a>
+      <a href="/login-confirm?code=${encodeURIComponent(code)}">Confirm login</a>
     `)
 
     if (!userAlreadyRegistered) {
@@ -74,7 +74,7 @@ routes.get('/login-confirm', async (req, res) => {
   if (typeof code === 'undefined') return AuthError(res, { code: 'BAD_REQUEST', message: 'You must have a valid login code to authenticate.' });
 
   try {
-    const splittedCode = code.split('.')
+    const splittedCode = decodeURIComponent(code).split('.')
     const [user_id, token, firstLogin] = splittedCode
 
     const checkTokenIsValid = await db.select('*').from('tokens').where({ token, user_id }).first()

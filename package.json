@@ -22,6 +22,7 @@
     "express-rate-limit": "^3.4.1",
     "faker": "^4.1.0",
     "graphql": "^14.2.1",
+    "graphql-depth-limit": "^1.1.0",
     "graphql-query-complexity": "^0.2.3",
     "helmet": "^3.16.0",
     "import-to-array": "^1.0.0",
